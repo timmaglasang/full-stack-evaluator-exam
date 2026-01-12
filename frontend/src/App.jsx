@@ -1,13 +1,16 @@
-import './App.css'
-import Tasks from "./Tasks"
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./Login";
+import Tasks from "./Tasks";
 
 function App() {
-  return (
-    <div className="app">
-      <h1>📝 React Task Evaluator</h1>
-      <Tasks />
-    </div>
-  );
+    return (
+        <Router>
+            <Routes>
+                <Route path="/" element={<Login />} />
+                <Route path="/tasks" element={<Tasks />} />
+            </Routes>
+        </Router>
+    );
 }
 
-export default App
+export default App;
