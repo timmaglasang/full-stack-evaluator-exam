@@ -9,17 +9,18 @@ var builder = WebApplication.CreateBuilder(args);
 var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // 2. Add CORS services
+
+// Add CORS policy
+// Add CORS policy 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: myAllowSpecificOrigins,
-        policy =>
-        {
-            policy.WithOrigins("http://localhost:7144") // Your Vite React URL
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+options.AddPolicy("AllowReactApp", 
+    policy => {
+        policy.WithOrigins("http://localhost:5173") // your React dev server
+           .AllowAnyHeader() 
+                                                     .AllowAnyMethod(); 
+        }); 
 });
-
 
 //builder.Services.AddControllers();
 builder.Services.AddControllers()
@@ -43,6 +44,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowReactApp");
 app.MapControllers();
 
 app.Run();
