@@ -29,7 +29,7 @@ namespace TaskManager.API
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TaskItem task)
         {
-            
+            task.UserId = 1;
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = task.Id }, task);
