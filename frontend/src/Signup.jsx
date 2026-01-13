@@ -1,9 +1,8 @@
-ï»¿import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate, Link } from "react-router-dom";
 import api from "../src/api/axios";
 
-const Login = () => {
+const Signup = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -20,14 +19,11 @@ const Login = () => {
 
         try {
             // send POST request to backend
-            const res = await api.post('/login', formData);
+            const res = await api.post('/users', formData);
             console.log("User created:", res.data);
 
-            if (res.status === 200) {
-                console.log("Login success:", res.data);
-                localStorage.setItem("userId", res.data.id);// âœ… Navigate to Tasks page
-                navigate("/tasks");
-            }
+            // redirect after success
+            navigate("/tasks");
         } catch (err) {
             console.error("Signup failed:", err.response?.data || err.message);
             alert("Signup failed. Please try again.");
@@ -39,7 +35,7 @@ const Login = () => {
     return (
         <div style={styles.container}>
             <form onSubmit={handleSubmit} style={styles.card}>
-                <h2 style={styles.title}>Welcome</h2>
+                <h2 style={styles.title}>Sign Up</h2>
                 <p style={styles.subtitle}>Please enter your details</p>
 
                 <div style={styles.inputGroup}>
@@ -62,7 +58,7 @@ const Login = () => {
                             type={showPassword ? "text" : "password"}
                             name="password"
                             required
-                            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                            placeholder="••••••••"
                             value={formData.password}
                             onChange={handleChange}
                             style={styles.input}
@@ -78,11 +74,11 @@ const Login = () => {
                 </div>
 
                 <button type="submit" disabled={loading} style={styles.button}>
-                    {loading ? "Signing in..." : "Sign In"}
+                    {loading ? "Signing up..." : "Sign Up"}
                 </button>
 
                 <p style={styles.footer}>
-                    Don't have an account? <Link to="/signup" style={styles.link}>Sign Up</Link>
+                    Already have an account? <Link to="/" style={styles.link}>Log in</Link>
                 </p>
             </form>
         </div>
@@ -112,4 +108,4 @@ const styles = {
     link: { color: '#4318ff', textDecoration: 'none', fontWeight: 'bold' }
 };
 
-export default Login;
+export default Signup;

@@ -7,14 +7,20 @@ function Tasks() {
     const [newTitle, setNewTitle] = useState("");
     const [newStatus, setNewStatus] = useState(false);
 
+    const [editingTaskId, setEditingTaskId] = useState(null);
+
+
     useEffect(() => {
-        api.get('/tasks')
+        const userId = localStorage.getItem("userId");
+        console.log(userId);
+        api.get(`/tasks/${userId}`)
             .then(res => setTasks(res.data))
             .catch(err => console.error(err));
     }, []);
 
     const addTask = async () => {
-        const newTask = { title: newTitle, isDone: newStatus };
+        const userId = localStorage.getItem("userId");
+        const newTask = { title: newTitle, isDone: newStatus, userId: userId };
         try {
             const res = await api.post('/tasks', newTask);
             setTasks(prev => [...prev, res.data]);
@@ -26,15 +32,32 @@ function Tasks() {
         }
     };
 
-    const updateTask = async (id) => {
+    const updateTask = async () => {
         try {
-            const updatedTask = { title: "Updated Task", isDone: true };
-            const res = await api.put(`/tasks/${id}`, updatedTask);
-            setTasks(prev => prev.map(task => task.id === id ? res.data : task));
+            const updatedTask = { title: newTitle, isDone: newStatus };
+            const res = await api.put(`/tasks/${editingTaskId}`, updatedTask);
+            setTasks(prev =>
+                prev.map(task => (task.id === editingTaskId ? res.data : task))
+            );
+            setShowModal(false);
+            setNewTitle("");
+            setNewStatus(false);
+            setEditingTaskId(null);
         } catch (err) {
             console.error("Error updating task:", err);
         }
     };
+
+    const handleLogout = () => {
+        // Clear user data
+        localStorage.removeItem("userId");
+        
+        // Redirect to login page
+        window.location.href = "/";
+    };
+
+
+
 
     const deleteTask = async (id) => {
         try {
@@ -56,21 +79,37 @@ function Tasks() {
                 width: "100vw"
             }}
         >
-            <h2 style={{ marginBottom: "10px" }}>Tasks</h2>
-            <button
-                onClick={() => setShowModal(true)}
-                style={{
-                    marginBottom: "15px",
-                    padding: "8px 16px",
-                    backgroundColor: "#4CAF50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                }}
-            >
-                ➕ Add Task
-            </button>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+                <button
+                    onClick={() => setShowModal(true)}
+                    style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#4CAF50",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer"
+                    }}
+                >
+                    ➕ Add Task
+                </button>
+
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        padding: "8px 16px",
+                        backgroundColor: "#f44336",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "4px",
+                        cursor: "pointer"
+                    }}
+                >
+                    🚪 Logout
+                </button>
+            </div>
+
+
 
             <table
                 style={{
@@ -98,11 +137,16 @@ function Tasks() {
                             </td>
                             <td style={{ padding: "8px", border: "1px solid #ddd" }}>
                                 <button
-                                    onClick={() => updateTask(task.id)}
+                                    onClick={() => {
+                                        setEditingTaskId(task.id);
+                                        setNewTitle(task.title);
+                                        setNewStatus(task.isDone);
+                                        setShowModal(true);
+                                    }}
                                     style={{
                                         marginRight: "8px",
                                         padding: "6px 12px",
-                                        backgroundColor: "#FFD700", // yellow
+                                        backgroundColor: "#FFD700",
                                         color: "black",
                                         border: "none",
                                         borderRadius: "4px",
@@ -111,6 +155,7 @@ function Tasks() {
                                 >
                                     Update
                                 </button>
+
                                 <button
                                     onClick={() => deleteTask(task.id)}
                                     style={{
@@ -172,7 +217,7 @@ function Tasks() {
                         </label>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                             <button
-                                onClick={addTask}
+                                onClick={editingTaskId ? updateTask : addTask}
                                 style={{
                                     padding: "8px 16px",
                                     backgroundColor: "#4CAF50",
@@ -184,6 +229,7 @@ function Tasks() {
                             >
                                 Save
                             </button>
+
                             <button
                                 onClick={() => setShowModal(false)}
                                 style={{

@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Threading.Tasks;
 
 using TaskManager.Models;
 using TaskManager.Data;
@@ -18,18 +16,34 @@ namespace TaskManager.API
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Get()
+        //[HttpGet]
+        //public async Task<IActionResult> Get()
+        //{
+
+        //    var tasks = await _context.Tasks.ToListAsync();
+        //    return Ok(tasks);
+        //}
+
+        [HttpGet("{userId}")]
+
+        //[HttpGet]
+        public async Task<IActionResult> Get(int userId)
         {
-            
-            var tasks = await _context.Tasks.ToListAsync();
+            var tasks = await _context.Tasks
+                .Where(t => t.UserId == userId)   // filter by userId
+                .ToListAsync();
+
+            if (tasks == null || tasks.Count == 0)
+                return NotFound(new { message = "No tasks found for this user." });
+
             return Ok(tasks);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] TaskItem task)
         {
-            task.UserId = 1;
+            //task.UserId = 6;
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(Get), new { id = task.Id }, task);
